@@ -69,8 +69,12 @@ body {
     background-color: rgb(51, 51, 51, 0.602);
     text-align: center;
     
+    
 }
+.formulario input::placeholder{
+    color: aliceblue;
 
+}
 .create-account{
     padding: 2.7rem 0;
     font-size: 1.7rem;    

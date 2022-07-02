@@ -83,6 +83,7 @@ body {
     margin: 2rem;
     background-color: rgb(51, 51, 51, 0.602);
     text-align: center;
+    height: 550px;
     
 }
 
@@ -133,9 +134,13 @@ body {
     text-align: center;
     outline: none;    
     font-size: .9rem;    
-    color: white;
+    color: rgb(255, 255, 255);
 }
 
+.formulario input::placeholder{
+    color: aliceblue;
+
+}
 .formulario input[type="button"]{
     width: 60%;
     margin: auto;
@@ -144,11 +149,16 @@ body {
     border-radius: 2rem;
     background-color: white;
     font-weight: 600;
-    margin-top: 3rem;
+    margin-top: 1rem;
     font-size: .8rem;
     cursor: pointer;
     color:#222;
 }
+.select{
+    background-color: transparent;
+    color: aliceblue;
+}
+
 
 
 
