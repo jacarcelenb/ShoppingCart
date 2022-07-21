@@ -23,7 +23,9 @@ export class RegisterComponent implements OnInit {
     per_ciudad: ''
   }
 
-  constructor(private clienteService: ClientesService) { }
+  constructor(private clienteService: ClientesService) {
+  }
+
   ciudades: ModelCiudad[] = [];
   estado_civiles: ModelEstadoCivil[] = [];
   ngOnInit(): void {
@@ -31,7 +33,7 @@ export class RegisterComponent implements OnInit {
     this.GetAllCivilStates();
   }
 
-  
+
   GetAllCities() {
     this.clienteService.getCities().subscribe(
       (ciudad: any) => {
@@ -51,9 +53,26 @@ export class RegisterComponent implements OnInit {
       (error) => console.warn(error)
     )
   }
-  public validador: boolean = false;
-  validarCedula(cedula: string) {
-    let cedulaCorrecta = false;
+
+  validateNames(namesPer: string) {
+    var expr: RegExp = /^([A-Za-zÑñÁáÉéÍíÓóÚú]+['\-]{0,1}[A-Za-zÑñÁáÉéÍíÓóÚú]+)(\s+([A-Za-zÑñÁáÉéÍíÓóÚú]+['\-]{0,1}[A-Za-zÑñÁáÉéÍíÓóÚú]+))*$/g;
+    var verification = expr.test(namesPer);
+    return verification;
+  }
+
+  validatePasswords(password: string) {
+    var expr: RegExp = /^(?=\w*\d)(?=\w*[A-Z])(?=\w*[a-z])\S{8,}$/g;
+    var verification = expr.test(password);
+    return verification;
+  }
+
+  validateMail(mail: string) {
+    var expr: RegExp = /^([da-z_.-]+)@([da-z.-]+).([a-z.]{2,6})$/;
+    var verification = expr.test(mail);
+    return verification;
+  }
+
+  validateDNI(cedula: string) {
     if (cedula.length == 10) {
       let tercerDigito = parseInt(cedula.substring(2, 3));
       if (tercerDigito < 6) {
@@ -72,34 +91,177 @@ export class RegisterComponent implements OnInit {
         //  console.log(suma);
         //  console.log(digito);
         if ((Math.round(suma % 10) == 0) && (Math.round(suma % 10) == verificador)) {
-          cedulaCorrecta = true;
+          return true;
         } else if ((10 - (Math.round(suma % 10))) == verificador) {
-          cedulaCorrecta = true;
+          return true;
         } else {
-          cedulaCorrecta = false;
+          return false;
         }
       } else {
-        cedulaCorrecta = false;
+        return false;
       }
     } else {
-      cedulaCorrecta = false;
+      return false;
     }
-    this.validador = cedulaCorrecta;
+  }
+
+  validateRegisteredDNI(cedula: string) {
+    let clienteV = {
+      per_rol: 2,
+      per_cedula: '',
+      per_nombres: '',
+      per_direccion: '',
+      per_telefono: '',
+      per_correo: '',
+      per_clave: '',
+      per_estado: true,
+      per_estadocivil: '',
+      per_ciudad: ''
+    };
+    this.clienteService.getClientsByCedula(cedula).subscribe(
+      (cliente: any) => {
+        clienteV = cliente
+        console.log(cliente);
+      },
+      (error) => console.warn(error)
+    )
+    if (clienteV.per_cedula != '') {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  viewPassword() {
+    var tipo: HTMLInputElement = <HTMLInputElement>document.getElementById('password')!;
+    if (tipo.type == "password") {
+      tipo.type = "text";
+    } else {
+      tipo.type = "password";
+    }
   }
 
   SignUp() {
     console.log(this.clienteData)
     // utilizar try catch
     try {
-      this.clienteService.postClients(this.clienteData).subscribe((data: {}) => { })
-      Swal.fire({
-        position: 'center',
-        icon: 'success',
-        title: 'Su registro ha sido exitoso',
-        showConfirmButton: false,
-        timer: 1500
-      })
+      let warningDNI = document.getElementById('valueId')!;
+      let warningNames = document.getElementById('valueNames')!;
+      let warningAddress = document.getElementById('valueAddress')!;
+      let warningPhone = document.getElementById('valuePhone')!;
+      let warningMail = document.getElementById('valueMail')!;
+      let warningPassword = document.getElementById('valuePassword')!;
+      let warningCity = document.getElementById('valueCity')!;
+      let warningStatus = document.getElementById('valueStatus')!;
+
+      let comprobación = true;
+
+      if (this.clienteData.per_cedula == '') {
+        warningDNI.style.display = 'block';
+        comprobación = false;
+      } else {
+        if (this.validateDNI(this.clienteData.per_cedula)) {
+          // if (this.validateRegisteredDNI(this.clienteData.per_cedula)) {
+          //   warningDNI.innerHTML = "<i class='fas fa-info-circle'></i> Cédula ya registrada.";
+          //   warningDNI.style.display = 'block';
+          //   comprobación = false;
+          // } else {
+          warningDNI.style.display = 'none';
+          // }
+        } else {
+          warningDNI.innerHTML = "<i class='fas fa-info-circle'></i> Ingrese una cédula correcta.";
+          warningDNI.style.display = 'block';
+          comprobación = false;
+        }
+      }
+
+      if (this.clienteData.per_nombres == '') {
+        warningNames.innerHTML = "<i class='fas fa-info-circle'></i> Ingrese sus nombres.";
+        warningNames.style.display = 'block';
+        comprobación = false;
+      } else {
+        if (this.validateNames(this.clienteData.per_nombres)) {
+          warningNames.style.display = 'none';
+        } else {
+          warningNames.innerHTML = "<i class='fas fa-info-circle'></i> Ingrese un nombre correcto.";
+          warningNames.style.display = 'block';
+          comprobación = false;
+        }
+      }
+
+      if (this.clienteData.per_direccion == '') {
+        warningAddress.style.display = 'block';
+        comprobación = false;
+      } else {
+        warningAddress.style.display = 'none';
+      }
+
+      if (this.clienteData.per_telefono == '') {
+        warningPhone.style.display = 'block';
+        comprobación = false;
+      } else {
+        warningPhone.style.display = 'none';
+      }
+
+      if (this.clienteData.per_correo == '') {
+        warningMail.innerHTML = "<i class='fas fa-info-circle'></i> Ingrese un correo electrónico.";
+        warningMail.style.display = 'block';
+        comprobación = false;
+      } else {
+        if (this.validateMail(this.clienteData.per_correo)) {
+          warningMail.style.display = 'none';
+        } else {
+          warningMail.innerHTML = "<i class='fas fa-info-circle'></i> Ingrese un correo válido.";
+          warningMail.style.display = 'block';
+          comprobación = false;
+        }
+      }
+
+      if (this.validatePasswords(this.clienteData.per_clave)) {
+        warningPassword.style.display = 'none';
+      } else {
+        warningPassword.style.display = 'block';
+        comprobación = false;
+      }
+
+      if (this.clienteData.per_ciudad == 'Ciudad' || this.clienteData.per_ciudad == '') {
+        warningCity.style.display = 'block';
+        comprobación = false;
+      } else {
+        warningCity.style.display = 'none';
+      }
+
+      if (this.clienteData.per_estadocivil == '' || this.clienteData.per_estadocivil == 'Estado Civil') {
+        warningStatus.style.display = 'block';
+        comprobación = false;
+      } else {
+        warningStatus.style.display = 'none';
+      }
+
+
+      if (comprobación) {
+        // this.clienteService.postClients(this.clienteData).subscribe((data: {}) => { })
+        Swal.fire({
+          position: 'center',
+          icon: 'success',
+          title: 'Su registro ha sido exitoso',
+          showConfirmButton: false,
+          timer: 1500
+        })
+      } else {
+        Swal.fire({
+          position: 'center',
+          icon: 'warning',
+          title: 'Revise si los datos ingresados son correctos.',
+          showConfirmButton: false,
+          timer: 2000
+        })
+      }
+
+      return comprobación;
     } catch (error) {
+      console.log(error);
+      return false;
       Swal.fire({
         position: 'center',
         icon: 'warning',
@@ -108,7 +270,6 @@ export class RegisterComponent implements OnInit {
         timer: 1500
       })
     }
-
   }
 
 
