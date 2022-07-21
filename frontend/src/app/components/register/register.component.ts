@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ModelCiudad } from 'src/app/model/model.ciudad';
+import { ModelCliente } from 'src/app/model/model.cliente';
 import { ModelEstadoCivil } from 'src/app/model/model.state';
 import { ClientesService } from 'src/app/service/clientes.service';
 import Swal from 'sweetalert2';
@@ -28,9 +29,11 @@ export class RegisterComponent implements OnInit {
 
   ciudades: ModelCiudad[] = [];
   estado_civiles: ModelEstadoCivil[] = [];
+  clients: ModelCliente[] = [];
   ngOnInit(): void {
     this.GetAllCities();
     this.GetAllCivilStates();
+    this.getAllClients();
   }
 
 
@@ -105,44 +108,52 @@ export class RegisterComponent implements OnInit {
     }
   }
 
-  validateRegisteredDNI(cedula: string) {
-    let clienteV = {
-      per_rol: 2,
-      per_cedula: '',
-      per_nombres: '',
-      per_direccion: '',
-      per_telefono: '',
-      per_correo: '',
-      per_clave: '',
-      per_estado: true,
-      per_estadocivil: '',
-      per_ciudad: ''
-    };
-    this.clienteService.getClientsByCedula(cedula).subscribe(
-      (cliente: any) => {
-        clienteV = cliente
-        console.log(cliente);
-      },
-      (error) => console.warn(error)
-    )
-    if (clienteV.per_cedula != '') {
-      return false;
-    } else {
-      return true;
-    }
+  // getClientByCedula() {
+  //   this.clienteService.getClientsByCedula(this.clienteData.per_cedula).subscribe(
+  //     (cliente: any) => {
+  //       this.clientValidate = cliente;
+
+  //     });
+
+  //   console.log(this.clientValidate);
+  //   if (this.clientValidate[0] != null) {
+  //     return false;
+  //   } else {
+  //     return true;
+  //   }
+  // }
+
+  validateRegisteredDNI() {
+    let validation = false;
+    this.clients.forEach(client => {
+      if (client.per_cedula == this.clienteData.per_cedula) {
+        validation = true;
+      }
+    })
+    return validation;
+  }
+
+  getAllClients() {
+    this.clienteService.getAllClientes().subscribe(
+      (cliente: ModelCliente[]) => {
+        this.clients = cliente;
+      });
   }
 
   viewPassword() {
     var tipo: HTMLInputElement = <HTMLInputElement>document.getElementById('password')!;
+    let iconView = document.getElementById('viewP')!;
     if (tipo.type == "password") {
       tipo.type = "text";
+      iconView.innerHTML = '<i class="fas fa-eye-slash"></i>';
     } else {
       tipo.type = "password";
+      iconView.innerHTML = '<i class="fas fa-eye"></i>';
     }
   }
 
   SignUp() {
-    console.log(this.clienteData)
+    // console.log(this.clienteData)
     // utilizar try catch
     try {
       let warningDNI = document.getElementById('valueId')!;
@@ -161,13 +172,13 @@ export class RegisterComponent implements OnInit {
         comprobación = false;
       } else {
         if (this.validateDNI(this.clienteData.per_cedula)) {
-          // if (this.validateRegisteredDNI(this.clienteData.per_cedula)) {
-          //   warningDNI.innerHTML = "<i class='fas fa-info-circle'></i> Cédula ya registrada.";
-          //   warningDNI.style.display = 'block';
-          //   comprobación = false;
-          // } else {
-          warningDNI.style.display = 'none';
-          // }
+          if (this.validateRegisteredDNI()) {
+            warningDNI.innerHTML = "<i class='fas fa-info-circle'></i> Cédula ya registrada.";
+            warningDNI.style.display = 'block';
+            comprobación = false;
+          } else {
+            warningDNI.style.display = 'none';
+          }
         } else {
           warningDNI.innerHTML = "<i class='fas fa-info-circle'></i> Ingrese una cédula correcta.";
           warningDNI.style.display = 'block';
