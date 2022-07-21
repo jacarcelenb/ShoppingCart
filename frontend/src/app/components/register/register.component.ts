@@ -251,7 +251,7 @@ export class RegisterComponent implements OnInit {
 
 
       if (comprobación) {
-        // this.clienteService.postClients(this.clienteData).subscribe((data: {}) => { })
+        this.clienteService.postClients(this.clienteData).subscribe((data: {}) => { })
         Swal.fire({
           position: 'center',
           icon: 'success',
