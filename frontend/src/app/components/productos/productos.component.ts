@@ -1,5 +1,5 @@
-import { Component,  OnInit } from '@angular/core';
-import { FormGroup, FormBuilder } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ModelProductos } from 'src/app/model/model.productos';
 import { ModelCategoria } from 'src/app/model/model.categoria';
 import { ProductoService } from 'src/app/service/productos.service';
@@ -19,16 +19,17 @@ export class ProductosComponent implements OnInit {
   categorias: ModelCategoria[] = [];
   public idCategoria!: number;
   public descripcionCategoria!: String
-  public pro_categorias: String[] = ["Ropa", "Electrodomesticos", 
-  "Accesorios","Aseo Personal","Tecnologia","Limpieza"];
+  resultado!: string;
+  public pro_categorias: String[] = ["Ropa", "Electrodomesticos",
+    "Accesorios", "Aseo Personal", "Tecnologia", "Limpieza"];
 
   public form!: FormGroup;
   pro: string = 'Anillo';
   nombreProducto: string = '';
   page: number = 0;
   id_producto: any
-  imagen_producto: string ="";
-  imagen_update:  string ="";
+  imagen_producto: string = "";
+  imagen_update: string = "";
 
   public informacionProducto = {
     pro_id: -1,
@@ -44,81 +45,88 @@ export class ProductosComponent implements OnInit {
 
   constructor(private formBuilder: FormBuilder,
     private route: ActivatedRoute,
-    private productoService: ProductoService , private storageService: StorageService) {
-    
+    private productoService: ProductoService, private storageService: StorageService) {
+
   }
 
   ngOnInit(): void {
-   
+
     this.form = this.formBuilder.group({
-      txtpro_id: [''],
-      txtpro_nombres: [''],
-      txtcantidad: [''],
-      txtpro_codigo: [''],
-      txtpro_cantidad: [''],
-      txtpro_descripcion: [''],
-      txtpro_precio: [''],
-      categoriaSelected: [],
-      txtpro_imagen: ['']
+      txtpro_id: ['',[Validators.required]],
+      txtpro_nombres: ['',[Validators.required, Validators.minLength(3),Validators.pattern(/^[a-z\s\u00E0-\u00FC\u00f1]*$/i)]],
+      txtcantidad: ['',[Validators.required]],
+      txtpro_codigo: ['',[Validators.required]],
+      txtpro_cantidad: ['',[Validators.required,Validators.pattern('/^[1-9]\d{6,10}$/')]],
+      txtpro_descripcion: ['',[Validators.required, Validators.minLength(5)]],
+      txtpro_precio: ['',[Validators.required,Validators.pattern('/^[1-9]\d{6,10}$/')]],
+      categoriaSelected: [,[Validators.required]],
+      txtpro_imagen: ['',[Validators.required]]
     })
     this.leerProductos();
-    
+    this.submit();
   }
 
-  public nextPage(){
+  submit() {
+    if (this.form.valid)
+      this.resultado = "Todos los datos son válidos";
+    else
+      this.resultado = "Hay datos inválidos en el formulario";
+  }
+
+  public nextPage() {
     this.page += 5;
   }
 
-  public previousPage(){
+  public previousPage() {
     if (this.page > 0)
-      this.page -=5;
+      this.page -= 5;
   }
 
-  showcategory(category: string):number{
+  showcategory(category: string): number {
     let id = 0
 
-    if (category==='Ropa') {
-      id=2
+    if (category === 'Ropa') {
+      id = 2
     }
-    if (category==="Electrodomesticos") {
-      id=3
+    if (category === "Electrodomesticos") {
+      id = 3
     }
-    if (category==="Accesorios") {
-      id=4
+    if (category === "Accesorios") {
+      id = 4
     }
-    if (category==="Aseo Personal") {
-      id=5
+    if (category === "Aseo Personal") {
+      id = 5
     }
-    if (category==="Tecnologia") {
-      id=6
+    if (category === "Tecnologia") {
+      id = 6
     }
-    if (category==="Limpieza") {
-      id=8
+    if (category === "Limpieza") {
+      id = 8
     }
     console.log(category.length)
     console.log(id)
     return id
   }
 
-  showCategoyById(id: number):string{
+  showCategoyById(id: number): string {
     let category = ""
-    if (id==2) {
-      category ="Ropa"
+    if (id == 2) {
+      category = "Ropa"
     }
-    if (id ==3) {
-      category ="Electrodomesticos"
+    if (id == 3) {
+      category = "Electrodomesticos"
     }
-    if (id ==4) {
-      category ="Accesorios"
+    if (id == 4) {
+      category = "Accesorios"
     }
-    if (id ==5) {
-      category ="Aseo Personal"
+    if (id == 5) {
+      category = "Aseo Personal"
     }
-    if (id ==6) {
-      category ="Tecnologia"
+    if (id == 6) {
+      category = "Tecnologia"
     }
-    if (id ==8) {
-      category ="Limpieza"
+    if (id == 8) {
+      category = "Limpieza"
     }
     return category
   }
@@ -133,14 +141,14 @@ export class ProductosComponent implements OnInit {
     )
   }
 
-  public cargarImagen(event:any){
+  public cargarImagen(event: any) {
     let archivo = event.target.files
     let reader = new FileReader();
     let nombre = "img"
     let fecha = Date.now()
     reader.readAsDataURL(archivo[0])
-    reader.onloadend =()=>{
-      this.storageService.subirImagen(nombre+""+fecha, reader.result).then(urlImagen=>{
+    reader.onloadend = () => {
+      this.storageService.subirImagen(nombre + "" + fecha, reader.result).then(urlImagen => {
         console.log(urlImagen)
         this.imagen_producto = String(urlImagen)
       })
@@ -159,7 +167,141 @@ export class ProductosComponent implements OnInit {
   }
 
 
-  
+  validateNames(namesPer: string) {
+    var expr: RegExp = /^([A-Za.-zÑñÁáÉéÍíÓóÚú]+[0-9]+['\-]{0,1}[A-Za-zÑñÁáÉéÍíÓóÚú]+)(\s+([A-Za-zÑñÁáÉéÍíÓóÚú]+['\-]{0,1}[A-Za-zÑñÁáÉéÍíÓóÚú]+))*$/g;
+    var verification = expr.test(namesPer);
+    return verification;
+  }
+
+  validateMail(mail: string) {
+    var expr: RegExp = /^([da-z_.-]+)@([da-z.-]+).([a-z.]{2,6})$/;
+    var verification = expr.test(mail);
+    return verification;
+  }
+
+  productPost() {
+    console.log(this.informacionProducto)
+    // utilizar try catch
+    try {
+      let warningCode = document.getElementById('valueCode')!;
+      let warningNames = document.getElementById('valueNames')!;
+      let warningDescription = document.getElementById('valueDescription')!;
+      let warningCategory = document.getElementById('valueCategory')!;
+      let warningAmount = document.getElementById('valueAmount')!;
+      let warningImage = document.getElementById('valueImage')!;
+      let warningCost = document.getElementById('valueCost')!;
+
+
+      let comprobación = true;
+
+      if (this.informacionProducto.pro_codigo == '') {
+        warningCode.innerHTML = "<i class='fas fa-info-circle'></i> Ingrese el codigo del producto.";
+        warningCode.style.display = 'block';
+        comprobación = false;
+      } else {
+        if (this.validateNames(this.informacionProducto.pro_codigo)) {
+          warningCode.style.display = 'none';
+        } else {
+          warningCode.innerHTML = "<i class='fas fa-info-circle'></i> Ingrese un codigo producto correcto.";
+          warningCode.style.display = 'block';
+          comprobación = false;
+        }
+      }
+
+      if (this.informacionProducto.pro_nombres == '') {
+        warningNames.innerHTML = "<i class='fas fa-info-circle'></i> Ingrese nombre producto.";
+        warningNames.style.display = 'block';
+        comprobación = false;
+      } else {
+        if (this.validateNames(this.informacionProducto.pro_nombres)) {
+          warningNames.style.display = 'none';
+        } else {
+          warningNames.innerHTML = "<i class='fas fa-info-circle'></i> Ingrese un nombre producto correcto.";
+          warningNames.style.display = 'block';
+          comprobación = false;
+        }
+      }
+
+      if (this.informacionProducto.pro_descripcion == '') {
+        warningDescription.innerHTML = "<i class='fas fa-info-circle'></i> Ingrese descripcion producto.";
+        warningDescription.style.display = 'block';
+        comprobación = false;
+      } else {
+        if (this.validateNames(this.informacionProducto.pro_descripcion)) {
+          warningDescription.style.display = 'none';
+        } else {
+          warningDescription.innerHTML = "<i class='fas fa-info-circle'></i> Ingrese una descripcion producto correcto.";
+          warningDescription.style.display = 'block';
+          comprobación = false;
+        }
+      }
+
+      if (this.informacionProducto.cat_descripcion == 'Categoria' || this.informacionProducto.cat_descripcion == '') {
+        warningCategory.style.display = 'block';
+        comprobación = false;
+      } else {
+        warningCategory.style.display = 'none';
+      }
+
+      if (this.informacionProducto.pro_cantidad == '') {
+        warningAmount.style.display = 'block';
+        comprobación = false;
+      } else {
+        warningAmount.style.display = 'none';
+      }
+      if (this.informacionProducto.pro_imagen == '') {
+        warningImage.innerHTML = "<i class='fas fa-info-circle'></i> Ingrese imagen producto.";
+        warningImage.style.display = 'block';
+        comprobación = false;
+      } else {
+        if (this.validateNames(this.informacionProducto.pro_imagen)) {
+          warningImage.style.display = 'none';
+        } else {
+          warningImage.innerHTML = "<i class='fas fa-info-circle'></i> Ingrese una imagen producto correcto.";
+          warningImage.style.display = 'block';
+          comprobación = false;
+        }
+      }
+
+      if (this.informacionProducto.pro_precio == '') {
+        warningCost.style.display = 'block';
+        comprobación = false;
+      } else {
+        warningCost.style.display = 'none';
+      }
+
+      if (comprobación) {
+        // this.clienteService.postClients(this.clienteData).subscribe((data: {}) => { })
+        Swal.fire({
+          position: 'center',
+          icon: 'success',
+          title: 'Su registro ha sido exitoso',
+          showConfirmButton: false,
+          timer: 1500
+        })
+      } else {
+        Swal.fire({
+          position: 'center',
+          icon: 'warning',
+          title: 'Revise si los datos ingresados son correctos.',
+          showConfirmButton: false,
+          timer: 2000
+        })
+      }
+
+
+    } catch (error) {
+      console.log(error);
+
+      Swal.fire({
+        position: 'center',
+        icon: 'warning',
+        title: 'Su registro ha fallado',
+        showConfirmButton: false,
+        timer: 1500
+      })
+    }
+  }
 
   public postProduct() {
     this.productoService.postCreateProduct({
@@ -182,6 +324,7 @@ export class ProductosComponent implements OnInit {
         })
         this.form.reset();
         this.leerProductos();
+        this.submit();
       }
     )
   }
@@ -210,7 +353,7 @@ export class ProductosComponent implements OnInit {
     if (this.imagen_producto == "") {
       this.imagen_producto = this.imagen_update
     }
-    this.productoService.putUpdateProduct(this.id_producto ,
+    this.productoService.putUpdateProduct(this.id_producto,
       {
         pro_id: this.id_producto,
         codigo_prod: this.form.value.txtpro_codigo,
@@ -221,21 +364,21 @@ export class ProductosComponent implements OnInit {
         pro_estado: true,
         pro_precio: this.form.value.txtpro_precio,
         pro_imagen: this.imagen_producto,
-  
-      }).subscribe(
-      respuesta => {
-        Swal.fire({
-          position: 'center',
-          icon: 'success',
-          title: 'Producto actualizado correctamente',
-          showConfirmButton: false,
-          timer: 1500
-        })
-        this.form.reset()
-        this.leerProductos()
 
-      }
-    )
+      }).subscribe(
+        respuesta => {
+          Swal.fire({
+            position: 'center',
+            icon: 'success',
+            title: 'Producto actualizado correctamente',
+            showConfirmButton: false,
+            timer: 1500
+          })
+          this.form.reset()
+          this.leerProductos()
+
+        }
+      )
   }
 
   public deleteProducto(pro_id: any) {
@@ -251,7 +394,7 @@ export class ProductosComponent implements OnInit {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.productoService.deleteProduct(pro_id ,
+        this.productoService.deleteProduct(pro_id,
           {
             pro_id: pro_id,
             pro_codigo: this.form.value.txtpro_codigo,
@@ -261,14 +404,14 @@ export class ProductosComponent implements OnInit {
             pro_cantidad: this.form.value.cantidadSelected,
             pro_precio: this.form.value.txtpro_precio,
             pro_imagen: this.imagen_producto,
-      
+
           }).subscribe(
-          respuesta => {
-            this.form.reset()
-            this.leerProductos()
-    
-          }
-        )
+            respuesta => {
+              this.form.reset()
+              this.leerProductos()
+
+            }
+          )
 
         Swal.fire(
           'Eliminado!',

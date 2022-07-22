@@ -64,6 +64,11 @@ section{
     
 }
 
+.span{
+    font-size: 30px;
+    color: #fff;
+}
+
 @media (max-width: 952px){
     .enlace{
         padding-left: 20px;
