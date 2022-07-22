@@ -62,6 +62,7 @@
                 <img src="{{item.pro_imagen}}" alt="">
                 <h5 style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;max-width: 100ch; font-size: 20px; font-family:Arial; ">{{item.pro_nombre}}</h5>
                 <p style="font-size: 15px;"><strong>Precio:</strong> ${{item.pro_precio}}</p>
+                <p style="font-size: 15px;"><strong>Cantidad:</strong> {{item.pro_cantidad}}</p>
                 <button class="btn btn-success" (click)="addToCart(item)" >Añadir al carrito
                     <i style="font-size: 20px;" class="fas fa-cart-plus">&nbsp;</i>
                 </button>

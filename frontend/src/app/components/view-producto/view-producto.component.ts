@@ -35,7 +35,15 @@ export class ViewProductoComponent implements OnInit {
   }
 
   addToCart(item: any){
-    if(item){
+    if(item.pro_cantidad == 0){
+      Swal.fire({
+        icon: 'warning',
+        title: 'Producto Agotado',
+        showConfirmButton: false,
+        timer: 1500
+      })
+  
+    }else{
       Swal.fire({
         icon: 'success',
         title: 'Producto seleccionado correctamente',

@@ -66,8 +66,8 @@
                         <td><img style="width:120px;" src="{{item.pro_imagen}}" alt=""></td>
                         <td style="width:25%;">{{item.pro_descripcion}}</td>
                         <td style="width:12%;">{{item.pro_precio}}</td>
-                        <td>{{item.pro_cantidad}}</td>
-                        <td>${{item.pro_cantidad*item.pro_precio}}</td>
+                        <td>{{item.quantity}}</td>
+                        <td>${{item.quantity * item.pro_precio}}</td>
                         <td>
                             <button (click)="removeItem(item)" class="btn btn-danger"><i class="fas fa-trash"></i>Quitar</button>
                         </td> 

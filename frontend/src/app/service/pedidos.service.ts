@@ -53,8 +53,6 @@ export class PedidosService {
     const url = "https://app-backend-sh-cart.herokuapp.com/pedidos/detalles"
     return this.http.post(url, JSON.stringify(detail) ,this.httpOptions);
   }
-  
-
   // LOCALH0ST
 
   // public getOrderHeaders() {

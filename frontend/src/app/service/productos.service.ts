@@ -49,4 +49,9 @@ export class ProductoService {
     return this.http.put(url,body)
   }
 
+  public putUpdateStock(id: any,body:any){
+    const url=`https://app-backend-sh-cart.herokuapp.com/productos/stock/`+id
+    return this.http.put(url,body)
+  }
+
 }

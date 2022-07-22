@@ -5,6 +5,7 @@ import { ClientesService } from 'src/app/service/clientes.service';
 import { PedidosService } from 'src/app/service/pedidos.service';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
+import { ProductoService } from 'src/app/service/productos.service';
 
 @Component({
   selector: 'app-cart',
@@ -27,6 +28,8 @@ export class CartComponent implements OnInit {
   ped_cabecera: number = 0;
   detalles: ModelPedidoDetalle[] = [];
   detail!: ModelPedidoDetalle;
+  stock_productos: any =[];
+  stock: number=0;
   producto = {
     pro_id: 0,
     cat_id: 0,
@@ -64,7 +67,7 @@ export class CartComponent implements OnInit {
   public grandTotal: number = 0;
   constructor(private cartService: CartService,
     private pedidoService: PedidosService, private clienteService: ClientesService
-    ,private router: Router) { }
+    ,private router: Router,private productoService: ProductoService) { }
 
   ngOnInit(): void {
     this.cartService.getProducts()
@@ -116,6 +119,7 @@ export class CartComponent implements OnInit {
     this.producto.pro_estado = this.productLast.pro_estado
     this.producto.codigo_prod = this.productLast.codigo_prod
     this.producto.pro_imagen = this.productLast.pro_imagen
+   
 
     if (this.producto.pro_cantidad < this.quantity.value) {
 
@@ -127,8 +131,10 @@ export class CartComponent implements OnInit {
       })
     } else {
       for (let index = 0; index < this.product.length; index++) {
+      
         if (this.product[index].pro_id === this.producto.pro_id) {
-          this.product[index].pro_cantidad = this.quantity.value;
+         
+          this.product[index].quantity = this.quantity.value;
         }
         this.selectProduct.push(this.product[index])
       }
@@ -147,8 +153,7 @@ export class CartComponent implements OnInit {
       this.showProducts()
     }
 
-
-
+   
   }
 
 
@@ -188,17 +193,16 @@ export class CartComponent implements OnInit {
       }
     })
 
-
   }
 
   getTotal(): number {
     let total = 0
     for (let index = 0; index < this.selectProduct.length; index++) {
 
-      total += this.selectProduct[index].pro_cantidad * this.selectProduct[index].pro_precio;
+      total += this.selectProduct[index].quantity * this.selectProduct[index].pro_precio;
 
     }
-    return total;
+    return parseFloat(total.toFixed(2));
   }
 
   dateToYMD(date: Date): string {
@@ -209,7 +213,7 @@ export class CartComponent implements OnInit {
   }
 
   createPedido() {
-
+    console.log(this.stock)
     Swal.fire({
       title: '¿Está seguro de realizar este pedido?',
       text: "No podrá revertir esta acción!",
@@ -225,8 +229,8 @@ export class CartComponent implements OnInit {
           this.pedidoCabecera.per_id = this.cliente[0].per_id;
           this.pedidoCabecera.ped_cab_codigo = "PC000PEF" + (this.num_cabecera + 2);
           this.pedidoCabecera.ped_cab_iva = this.iva;
-          this.pedidoCabecera.ped_cab_subtotal = this.subtotal;
-          this.pedidoCabecera.ped_cab_total = this.total;
+          this.pedidoCabecera.ped_cab_subtotal = parseFloat(this.subtotal.toFixed(2));
+          this.pedidoCabecera.ped_cab_total = parseFloat(this.total.toFixed(2));
           let fecha = new Date()
           console.log(fecha.getSeconds())
           this.pedidoCabecera.ped_cab_fecha = this.dateToYMD(fecha);
@@ -234,20 +238,29 @@ export class CartComponent implements OnInit {
           this.pedidoService.postOrderHeader(this.pedidoCabecera).subscribe((data: any) => {
             this.id_cabeceras = data
             console.log(this.id_cabeceras)
+            let valor = 0
             this.ped_cabecera = this.id_cabeceras[0].ped_cab_id
             console.log(this.ped_cabecera)
             for (let index = 0; index < this.selectProduct.length; index++) {
+              valor = this.selectProduct[index].quantity * this.selectProduct[index].pro_precio;
               this.pedidoDetalle.pro_id = this.selectProduct[index].pro_id
               this.pedidoDetalle.ped_cab_id = this.ped_cabecera;
-              this.pedidoDetalle.ped_det_cant = this.selectProduct[index].pro_cantidad;
+              this.pedidoDetalle.ped_det_cant = this.selectProduct[index].quantity;
               this.pedidoDetalle.ped_det_unitario = this.selectProduct[index].pro_precio,
-                this.pedidoDetalle.ped_det_total = this.selectProduct[index].pro_cantidad * this.selectProduct[index].pro_precio;
+              this.pedidoDetalle.ped_det_total = parseFloat(valor.toFixed(2))
 
               console.log("Datos encontrados")
               console.log(this.pedidoDetalle.pro_id)
               console.log(this.pedidoDetalle.ped_det_unitario)
               console.log(this.pedidoDetalle.ped_det_cant)
               console.log(this.pedidoDetalle)
+
+              // Actualizar el stock
+              let cantidad = this.selectProduct[index].pro_cantidad - this.selectProduct[index].quantity;
+              this.productoService.putUpdateStock(this.selectProduct[index].pro_id,{pro_cantidad: cantidad }).subscribe((data:any) => {
+               console.log("producto "+this.selectProduct[index].pro_id + " cantidad "+ cantidad)
+               console.log("")
+              })
 
               this.pedidoService.postOrderDetail(this.pedidoDetalle).subscribe((data: {}) => {
                this.cartService.removeAllCart();
