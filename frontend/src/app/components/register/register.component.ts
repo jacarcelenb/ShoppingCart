@@ -3,6 +3,7 @@ import { ModelCiudad } from 'src/app/model/model.ciudad';
 import { ModelCliente } from 'src/app/model/model.cliente';
 import { ModelEstadoCivil } from 'src/app/model/model.state';
 import { ClientesService } from 'src/app/service/clientes.service';
+import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -24,7 +25,8 @@ export class RegisterComponent implements OnInit {
     per_ciudad: ''
   }
 
-  constructor(private clienteService: ClientesService) {
+  constructor(private clienteService: ClientesService ,
+    private router: Router) {
   }
 
   ciudades: ModelCiudad[] = [];
@@ -259,6 +261,10 @@ export class RegisterComponent implements OnInit {
           showConfirmButton: false,
           timer: 1500
         })
+
+        this.router.navigate(['/login']);
+
+
       } else {
         Swal.fire({
           position: 'center',
